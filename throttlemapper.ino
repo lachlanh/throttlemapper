@@ -17,6 +17,8 @@ bool state=false; // variable holding information about the state of the output
 volatile int currentPWMValue = 0;
 
 void setup() {
+  Serial.begin(9600);
+  
   pinMode(PASPin, INPUT); // initialize the PAS pin as a input
   attachInterrupt(digitalPinToInterrupt(PASPin), pulse, RISING); //Each rising edge on PAS pin causes an interrupt
   pinMode(ledPin, OUTPUT); // initialize the LED as an output
@@ -54,6 +56,8 @@ void turnOff() {
 
 //Turn on output and set state variable to true
 void turnOn() {
+  Serial.print("sensor = ");
+  Serial.print(sensorValue);
   //analogWrite(PWMOut, highPWMValue);
   //state=true;
   state=true;
@@ -69,6 +73,8 @@ void turnOn() {
       currentTime = millis();
     }
   }
+  //Serial.print("sensor = ");
+  //Serial.print(sensorValue);
 }
 
 //Interrupt subroutine, refresh last impulse timestamp and increment pulse counter (until 10000 is reached)
