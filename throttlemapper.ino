@@ -1,3 +1,6 @@
+//DO NOT USE.
+//THIS SOFTWARE IS NOT TESTED AND UNFIT FOR ANY PURPOSE.
+
 //Hardware constants
 const int PASPin = 2;    // input from PAS
 const int ledPin = 13, PWMOut=11;  // the pin that the LED is attached to and the PWM output pin
