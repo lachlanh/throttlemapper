@@ -3,7 +3,9 @@
 
 //Hardware constants
 const int PASPin = 2;    // input from PAS
-const int ledPin = 13, PWMOut=11;  // the pin that the LED is attached to and the PWM output pin
+const int ledPin = 13;
+const int switchPin1 = 8, switchPin2 = 9;  // the pin that the LED is attached to and the PWM output pin
+//tested on arduino due pins
 
 //Software constants
 const unsigned long activityTimeoutMS = 300; // Allowed PAS signal inactivity time before turning off
@@ -17,6 +19,7 @@ bool state=false; // variable holding information about the state of the output
 volatile int currentPWMValue = 0;
 volatile unsigned long pedallingTime = 0;
 volatile int cadenceTicks = 0;
+int switchPos = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -24,8 +27,10 @@ void setup() {
   pinMode(PASPin, INPUT); // initialize the PAS pin as a input
   attachInterrupt(digitalPinToInterrupt(PASPin), pulse, RISING); //Each rising edge on PAS pin causes an interrupt
   pinMode(ledPin, OUTPUT); // initialize the LED as an output
-  pinMode(PWMOut, OUTPUT); // initialize the PWM pin as an output
+  //pinMode(PWMOut, OUTPUT); // initialize the PWM pin as an output
 
+  pinMode(switchPin1, INPUT_PULLUP);
+  pinMode(switchPin2, INPUT_PULLUP);
   
 }
 
@@ -48,6 +53,19 @@ void loop() {
     }
   }
 
+  //logic to read 3 position switch
+  //this should have some safety built in, if it loses ground it will stick in a position.
+  if (digitalRead(switchPin1) == LOW) {
+     //blue and red(gnd)
+     switchPos = 1;
+  } else if (digitalRead(switchPin2) == LOW){
+     //black and red(gnd)
+     switchPos = 3;
+  } else {
+     //middle pos
+     switchPos = 2;    
+  }   
+
   if ((curTime - pedallingTime) > 1000) {
     Serial.print("cadenceTicks : ");
     Serial.print(cadenceTicks);
@@ -61,6 +79,11 @@ void loop() {
     noInterrupts();
     cadenceTicks=0;
     interrupts();
+
+    Serial.print("switch position : ");
+    Serial.print(switchPos);
+    Serial.print("\n");
+  
   }
   
   //Use LED for status info
