@@ -15,6 +15,8 @@ volatile int inputEdges = 0; // counter for the number of pulses since last rese
 volatile unsigned long lastEdgeTime = 0; // timestamp of last PAS pulse
 bool state=false; // variable holding information about the state of the output
 volatile int currentPWMValue = 0;
+volatile unsigned long pedallingTime = 0;
+volatile int cadenceTicks = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -23,12 +25,17 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(PASPin), pulse, RISING); //Each rising edge on PAS pin causes an interrupt
   pinMode(ledPin, OUTPUT); // initialize the LED as an output
   pinMode(PWMOut, OUTPUT); // initialize the PWM pin as an output
+
+  
 }
 
 
 void loop() {
   //If PAS signal is inactive for too long, turn off everything
   unsigned long curTime=millis();
+  if (pedallingTime == 0) {
+    pedallingTime = curTime;
+  }
   if ((curTime>lastEdgeTime)&&((curTime-lastEdgeTime)>activityTimeoutMS)) {
     turnOff();
   }
@@ -40,6 +47,21 @@ void loop() {
       turnOn();
     }
   }
+
+  if ((curTime - pedallingTime) > 1000) {
+    Serial.print("cadenceTicks : ");
+    Serial.print(cadenceTicks);
+    Serial.print("\n");
+    int rpm = (cadenceTicks*60)/12;
+    Serial.print("rpm : ");
+    Serial.print(rpm);
+    Serial.print("\n");
+     
+    pedallingTime = curTime;
+    noInterrupts();
+    cadenceTicks=0;
+    interrupts();
+  }
   
   //Use LED for status info
   digitalWrite(ledPin, state);
@@ -48,7 +70,7 @@ void loop() {
 //Turn off output, reset pulse counter and set state variable to false
 void turnOff() {
   noInterrupts();
-  analogWrite(PWMOut, lowPWMValue);
+  //analogWrite(PWMOut, lowPWMValue);
   inputEdges=0;
   state=false;
   interrupts();
@@ -56,25 +78,10 @@ void turnOff() {
 
 //Turn on output and set state variable to true
 void turnOn() {
-  Serial.print("sensor = ");
-  Serial.print(sensorValue);
-  //analogWrite(PWMOut, highPWMValue);
-  //state=true;
-  state=true;
-  currentPWMValue = lowPWMValue;
-  unsigned long currentTime = millis();
-  unsigned long intervalMS = 2;
-  int rampPWMValue = 1;
-  while (state && (currentPWMValue < highPWMValue)) {
-    if ((millis() - currentTime) > intervalMS) {
-      analogWrite(PWMOut, currentPWMValue);
-      analogWrite(ledPin, currentPWMValue);
-      currentPWMValue = currentPWMValue + rampPWMValue;
-      currentTime = millis();
-    }
-  }
   //Serial.print("sensor = ");
   //Serial.print(sensorValue);
+  //analogWrite(PWMOut, highPWMValue);
+  state=true;
 }
 
 //Interrupt subroutine, refresh last impulse timestamp and increment pulse counter (until 10000 is reached)
@@ -83,6 +90,7 @@ void pulse() {
   if (inputEdges<100) {
     inputEdges++;
   }  
+  cadenceTicks++;
 }
 
 
