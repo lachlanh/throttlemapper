@@ -6,7 +6,7 @@ const int PASPin = 2;    // input from PAS
 const int ledPin = 13, PWMOut=11;  // the pin that the LED is attached to and the PWM output pin
 
 //Software constants
-const unsigned long activityTimeoutMS = 300; // Allowed PAS signal inactivity time before turning off
+const unsigned long activityTimeoutMS = 400; // Allowed PAS signal inactivity time before turning off
 const int startPulses = 2; // Number of PAS pulses needed before turning on
 const int lowPWMValue = 56, highPWMValue = 170; // PWM values to drive throttle input, default 56 (1,1 V) and 170 (3,4 V), U=n/255*5V, n=U/5V*255
 
@@ -19,7 +19,8 @@ volatile int currentPWMValue = 0;
 void setup() {
   Serial.begin(9600);
   
-  pinMode(PASPin, INPUT); // initialize the PAS pin as a input
+    
+  pinMode(PASPin, INPUT_PULLUP); // initialize the PAS pin as a input
   attachInterrupt(digitalPinToInterrupt(PASPin), pulse, RISING); //Each rising edge on PAS pin causes an interrupt
   pinMode(ledPin, OUTPUT); // initialize the LED as an output
   pinMode(PWMOut, OUTPUT); // initialize the PWM pin as an output
@@ -47,6 +48,7 @@ void loop() {
 
 //Turn off output, reset pulse counter and set state variable to false
 void turnOff() {
+  //Serial.println("throttle off");
   noInterrupts();
   analogWrite(PWMOut, lowPWMValue);
   inputEdges=0;
@@ -56,23 +58,33 @@ void turnOff() {
 
 //Turn on output and set state variable to true
 void turnOn() {
-  Serial.print("sensor = ");
-  Serial.print(sensorValue);
+  //Serial.println("throttle on");
   //analogWrite(PWMOut, highPWMValue);
-  //state=true;
   state=true;
-  currentPWMValue = lowPWMValue;
-  unsigned long currentTime = millis();
-  unsigned long intervalMS = 2;
-  int rampPWMValue = 1;
-  while (state && (currentPWMValue < highPWMValue)) {
-    if ((millis() - currentTime) > intervalMS) {
-      analogWrite(PWMOut, currentPWMValue);
-      analogWrite(ledPin, currentPWMValue);
-      currentPWMValue = currentPWMValue + rampPWMValue;
-      currentTime = millis();
-    }
-  }
+  analogWrite(PWMOut, 64);
+  delay(100);
+  analogWrite(PWMOut, 128);
+  delay(200);
+  analogWrite(PWMOut, 160);
+  //delay(100);
+  //uanalogWrite(PWMOut, 175);
+  //state=true;
+//  currentPWMValue = lowPWMValue;
+//  unsigned long currentTime = millis();
+//  unsigned long intervalMS = 7;
+//  int rampPWMValue = 1;
+//  while (state && (currentPWMValue < highPWMValue)) {
+//    if ((millis() - currentTime) > intervalMS) {
+//      //Serial.print("currenttime : ");
+//      //Serial.print(currentTime);
+//      //Serial.print("\tcurrentPWMValue : ");
+//      //Serial.println(currentPWMValue);
+//      analogWrite(PWMOut, currentPWMValue);
+//      analogWrite(ledPin, currentPWMValue);
+//      currentPWMValue = currentPWMValue + rampPWMValue;
+//      currentTime = millis();
+//    }
+//  }
   //Serial.print("sensor = ");
   //Serial.print(sensorValue);
 }
