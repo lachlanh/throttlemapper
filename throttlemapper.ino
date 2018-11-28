@@ -1,9 +1,14 @@
-//DO NOT USE.
+#include <buffer.h>
+#include <crc.h>
+#include <datatypes.h>
+#include <VescUart.h>
+
+ //DO NOT USE.
 //THIS SOFTWARE IS NOT TESTED AND UNFIT FOR ANY PURPOSE.
 
 //Hardware constants
-const int PASPin = 2;    // input from PAS
-const int ledPin = 13;
+const int PASPin = 7;    // input from PAS
+const int ledPin = 17;
 const int switchPin1 = 8, switchPin2 = 9;  // the pin that the LED is attached to and the PWM output pin
 //tested on arduino due pins
 
@@ -21,6 +26,8 @@ volatile unsigned long pedallingTime = 0;
 volatile int cadenceTicks = 0;
 int switchPos = 0;
 
+VescUart UART;
+
 void setup() {
   Serial.begin(9600);
   
@@ -31,7 +38,10 @@ void setup() {
 
   pinMode(switchPin1, INPUT_PULLUP);
   pinMode(switchPin2, INPUT_PULLUP);
-  
+
+  Serial1.begin(115200);
+  while (!Serial1) {;}
+  UART.setSerialPort(&Serial1);
 }
 
 
@@ -83,6 +93,22 @@ void loop() {
     Serial.print("switch position : ");
     Serial.print(switchPos);
     Serial.print("\n");
+
+    //digitalWrite(ledPin, true);
+    UART.printVescValues();
+
+//    if ( UART.getVescValues() ) {
+//    Serial.println("print vesc values");
+//    Serial.println(UART.data.rpm);
+//    Serial.println(UART.data.inpVoltage);
+//    Serial.println(UART.data.ampHours);
+//    Serial.println(UART.data.tachometerAbs);
+//
+//  }
+//  else
+//  {
+//    Serial.println("Failed to get data!");
+//  }
   
   }
   
@@ -94,6 +120,7 @@ void loop() {
 void turnOff() {
   noInterrupts();
   //analogWrite(PWMOut, lowPWMValue);
+  UART.setDuty(0.0);
   inputEdges=0;
   state=false;
   interrupts();
@@ -104,6 +131,7 @@ void turnOn() {
   //Serial.print("sensor = ");
   //Serial.print(sensorValue);
   //analogWrite(PWMOut, highPWMValue);
+  UART.setDuty(0.1);
   state=true;
 }
 
