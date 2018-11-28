@@ -2,8 +2,8 @@
 //THIS SOFTWARE IS NOT TESTED AND UNFIT FOR ANY PURPOSE.
 
 //Hardware constants
-const int PASPin = 2;    // input from PAS
-const int ledPin = 13;
+const int PASPin = 7;    // input from PAS
+const int ledPin = 17;
 const int switchPin1 = 8, switchPin2 = 9;  // the pin that the LED is attached to and the PWM output pin
 //tested on arduino due pins
 
@@ -82,6 +82,10 @@ void loop() {
 
     Serial.print("switch position : ");
     Serial.print(switchPos);
+    Serial.print("\n");
+
+    Serial.print("state : ");
+    Serial.print(state);
     Serial.print("\n");
   
   }
