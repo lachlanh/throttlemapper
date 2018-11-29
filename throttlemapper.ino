@@ -94,6 +94,7 @@ void loop() {
     Serial.print(switchPos);
     Serial.print("\n");
 
+
     //digitalWrite(ledPin, true);
     UART.printVescValues();
 
@@ -109,6 +110,11 @@ void loop() {
 //  {
 //    Serial.println("Failed to get data!");
 //  }
+
+    Serial.print("state : ");
+    Serial.print(state);
+    Serial.print("\n");
+
   
   }
   
