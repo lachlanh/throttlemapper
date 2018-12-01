@@ -1,7 +1,7 @@
-#include <buffer.h>
-#include <crc.h>
-#include <datatypes.h>
+
 #include <VescUart.h>
+
+VescUart UART;
 
  //DO NOT USE.
 //THIS SOFTWARE IS NOT TESTED AND UNFIT FOR ANY PURPOSE.
@@ -10,12 +10,13 @@
 const int PASPin = 7;    // input from PAS
 const int ledPin = 17;
 const int switchPin1 = 8, switchPin2 = 9;  // the pin that the LED is attached to and the PWM output pin
+const int PWMOut = 10;
 //tested on arduino due pins
 
 //Software constants
 const unsigned long activityTimeoutMS = 300; // Allowed PAS signal inactivity time before turning off
 const int startPulses = 2; // Number of PAS pulses needed before turning on
-const int lowPWMValue = 56, highPWMValue = 170; // PWM values to drive throttle input, default 56 (1,1 V) and 170 (3,4 V), U=n/255*5V, n=U/5V*255
+const int lowPWMValue = 45, highPWMValue = 132; // PWM values to drive throttle input, default 56 (1,1 V) and 170 (3,4 V), U=n/255*5V, n=U/5V*255
 
 // Variables
 volatile int inputEdges = 0; // counter for the number of pulses since last reset
@@ -25,8 +26,9 @@ volatile int currentPWMValue = 0;
 volatile unsigned long pedallingTime = 0;
 volatile int cadenceTicks = 0;
 int switchPos = 0;
+float targetCurrent = 0.0;
 
-VescUart UART;
+
 
 void setup() {
   Serial.begin(9600);
@@ -34,13 +36,15 @@ void setup() {
   pinMode(PASPin, INPUT); // initialize the PAS pin as a input
   attachInterrupt(digitalPinToInterrupt(PASPin), pulse, RISING); //Each rising edge on PAS pin causes an interrupt
   pinMode(ledPin, OUTPUT); // initialize the LED as an output
-  //pinMode(PWMOut, OUTPUT); // initialize the PWM pin as an output
+  pinMode(PWMOut, OUTPUT); // initialize the PWM pin as an output
 
   pinMode(switchPin1, INPUT_PULLUP);
   pinMode(switchPin2, INPUT_PULLUP);
 
-  Serial1.begin(115200);
+  Serial1.begin(9600);
   while (!Serial1) {;}
+  
+  UART.setDebugPort(&Serial);
   UART.setSerialPort(&Serial1);
 }
 
@@ -68,15 +72,21 @@ void loop() {
   if (digitalRead(switchPin1) == LOW) {
      //blue and red(gnd)
      switchPos = 1;
+     targetCurrent = 0.0;
+     state = false; //remove this just for switch as accelerator
   } else if (digitalRead(switchPin2) == LOW){
      //black and red(gnd)
      switchPos = 3;
+     targetCurrent = 10.0;
+     
   } else {
      //middle pos
-     switchPos = 2;    
+     switchPos = 2;
+     targetCurrent = 5.0;    
+     
   }   
 
-  if ((curTime - pedallingTime) > 1000) {
+  if ((curTime - pedallingTime) > 5000) {
     Serial.print("cadenceTicks : ");
     Serial.print(cadenceTicks);
     Serial.print("\n");
@@ -96,7 +106,7 @@ void loop() {
 
 
     //digitalWrite(ledPin, true);
-    UART.printVescValues();
+    //UART.printVescValues();
 
 //    if ( UART.getVescValues() ) {
 //    Serial.println("print vesc values");
@@ -120,13 +130,18 @@ void loop() {
   
   //Use LED for status info
   digitalWrite(ledPin, state);
+  if (state) {
+    Serial.println("state is on switching current on");
+    UART.setCurrent(targetCurrent);
+  }
+  delay(50);
 }
 
 //Turn off output, reset pulse counter and set state variable to false
 void turnOff() {
   noInterrupts();
   //analogWrite(PWMOut, lowPWMValue);
-  UART.setDuty(0.0);
+  //UART.setDuty(0.0);
   inputEdges=0;
   state=false;
   interrupts();
@@ -137,7 +152,7 @@ void turnOn() {
   //Serial.print("sensor = ");
   //Serial.print(sensorValue);
   //analogWrite(PWMOut, highPWMValue);
-  UART.setDuty(0.1);
+  //UART.setDuty(0.1);
   state=true;
 }
 
