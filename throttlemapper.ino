@@ -9,7 +9,7 @@ VescUart UART;
 //Hardware constants
 const int PASPin = 7;    // input from PAS
 const int ledPin = 17;
-const int switchPin1 = 8, switchPin2 = 9;  // the pin that the LED is attached to and the PWM output pin
+const int switchPinPos1 = 9, switchPinPos3 = 8;  // the pin that the LED is attached to and the PWM output pin
 const int PWMOut = 10;
 //tested on arduino due pins
 
@@ -38,8 +38,8 @@ void setup() {
   pinMode(ledPin, OUTPUT); // initialize the LED as an output
   pinMode(PWMOut, OUTPUT); // initialize the PWM pin as an output
 
-  pinMode(switchPin1, INPUT_PULLUP);
-  pinMode(switchPin2, INPUT_PULLUP);
+  pinMode(switchPinPos1, INPUT_PULLUP);
+  pinMode(switchPinPos3, INPUT_PULLUP);
 
   Serial1.begin(9600);
   while (!Serial1) {;}
@@ -69,12 +69,12 @@ void loop() {
 
   //logic to read 3 position switch
   //this should have some safety built in, if it loses ground it will stick in a position.
-  if (digitalRead(switchPin1) == LOW) {
+  if (digitalRead(switchPinPos1) == LOW) {
      //blue and red(gnd)
      switchPos = 1;
      targetCurrent = 0.0;
      state = false; //remove this just for switch as accelerator
-  } else if (digitalRead(switchPin2) == LOW){
+  } else if (digitalRead(switchPinPos3) == LOW){
      //black and red(gnd)
      switchPos = 3;
      targetCurrent = 10.0;
