@@ -14,7 +14,7 @@ const int PWMOut = 10;
 //tested on arduino due pins
 
 //Software constants
-const unsigned long activityTimeoutMS = 300; // Allowed PAS signal inactivity time before turning off
+const unsigned long activityTimeoutMS = 250; // Allowed PAS signal inactivity time before turning off
 const int startPulses = 2; // Number of PAS pulses needed before turning on
 const int lowPWMValue = 45, highPWMValue = 132; // PWM values to drive throttle input, default 56 (1,1 V) and 170 (3,4 V), U=n/255*5V, n=U/5V*255
 
@@ -77,12 +77,12 @@ void loop() {
   } else if (digitalRead(switchPinPos3) == LOW){
      //black and red(gnd)
      switchPos = 3;
-     targetCurrent = 10.0;
+     targetCurrent = 25.0;
      
   } else {
      //middle pos
      switchPos = 2;
-     targetCurrent = 5.0;    
+     targetCurrent = 12.5;    
      
   }   
 
