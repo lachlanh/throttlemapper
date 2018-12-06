@@ -9,12 +9,12 @@ VescUart UART;
 //Hardware constants
 const int PASPin = 7;    // input from PAS
 const int ledPin = 17;
-const int switchPin1 = 8, switchPin2 = 9;  // the pin that the LED is attached to and the PWM output pin
+const int switchPinPos1 = 9, switchPinPos3 = 8;  // the pin that the LED is attached to and the PWM output pin
 const int PWMOut = 10;
 //tested on arduino due pins
 
 //Software constants
-const unsigned long activityTimeoutMS = 300; // Allowed PAS signal inactivity time before turning off
+const unsigned long activityTimeoutMS = 250; // Allowed PAS signal inactivity time before turning off
 const int startPulses = 2; // Number of PAS pulses needed before turning on
 const int lowPWMValue = 45, highPWMValue = 132; // PWM values to drive throttle input, default 56 (1,1 V) and 170 (3,4 V), U=n/255*5V, n=U/5V*255
 
@@ -38,8 +38,8 @@ void setup() {
   pinMode(ledPin, OUTPUT); // initialize the LED as an output
   pinMode(PWMOut, OUTPUT); // initialize the PWM pin as an output
 
-  pinMode(switchPin1, INPUT_PULLUP);
-  pinMode(switchPin2, INPUT_PULLUP);
+  pinMode(switchPinPos1, INPUT_PULLUP);
+  pinMode(switchPinPos3, INPUT_PULLUP);
 
   Serial1.begin(9600);
   while (!Serial1) {;}
@@ -69,20 +69,20 @@ void loop() {
 
   //logic to read 3 position switch
   //this should have some safety built in, if it loses ground it will stick in a position.
-  if (digitalRead(switchPin1) == LOW) {
+  if (digitalRead(switchPinPos1) == LOW) {
      //blue and red(gnd)
      switchPos = 1;
      targetCurrent = 0.0;
      state = false; //remove this just for switch as accelerator
-  } else if (digitalRead(switchPin2) == LOW){
+  } else if (digitalRead(switchPinPos3) == LOW){
      //black and red(gnd)
      switchPos = 3;
-     targetCurrent = 10.0;
+     targetCurrent = 25.0;
      
   } else {
      //middle pos
      switchPos = 2;
-     targetCurrent = 5.0;    
+     targetCurrent = 12.5;    
      
   }   
 
