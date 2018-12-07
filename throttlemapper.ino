@@ -21,6 +21,11 @@ const int lowPWMValue = 45, highPWMValue = 132; // PWM values to drive throttle 
 // Variables
 volatile int inputEdges = 0; // counter for the number of pulses since last reset
 volatile unsigned long lastEdgeTime = 0; // timestamp of last PAS pulse
+
+volatile unsigned long edgeInterval = 0;
+volatile unsigned long edgeTime = 0;
+float cadence = 0.0;
+
 bool state=false; // variable holding information about the state of the output
 volatile int currentPWMValue = 0;
 volatile unsigned long pedallingTime = 0;
@@ -84,57 +89,66 @@ void loop() {
      switchPos = 2;
      targetCurrent = 12.5;    
      
-  }   
+  } 
 
-  if ((curTime - pedallingTime) > 5000) {
-    Serial.print("cadenceTicks : ");
-    Serial.print(cadenceTicks);
-    Serial.print("\n");
-    int rpm = (cadenceTicks*60)/12;
-    Serial.print("rpm : ");
-    Serial.print(rpm);
-    Serial.print("\n");
-     
-    pedallingTime = curTime;
-    noInterrupts();
-    cadenceTicks=0;
-    interrupts();
+  //calculate cadence
+  cadence = (1000/edgeInterval)*(60/12); //should give rpm
 
-    Serial.print("switch position : ");
-    Serial.print(switchPos);
-    Serial.print("\n");
-
-
-    //digitalWrite(ledPin, true);
-    //UART.printVescValues();
-
-//    if ( UART.getVescValues() ) {
-//    Serial.println("print vesc values");
-//    Serial.println(UART.data.rpm);
-//    Serial.println(UART.data.inpVoltage);
-//    Serial.println(UART.data.ampHours);
-//    Serial.println(UART.data.tachometerAbs);
-//
-//  }
-//  else
-//  {
-//    Serial.println("Failed to get data!");
-//  }
-
-    Serial.print("state : ");
-    Serial.print(state);
-    Serial.print("\n");
-
-  
+  if ((curTime - pedallingTime) > 1000) {
+    Serial.print("cadence : ");
+    Serial.print(cadence);
   }
+
+//  if ((curTime - pedallingTime) > 5000) {
+//    Serial.print("cadenceTicks : ");
+//    Serial.print(cadenceTicks);
+//    Serial.print("\n");
+//    int rpm = (cadenceTicks*60)/12;
+//    Serial.print("rpm : ");
+//    Serial.print(rpm);
+//    Serial.print("\n");
+//     
+//    pedallingTime = curTime;
+//    noInterrupts();
+//    cadenceTicks=0;
+//    interrupts();
+//
+//    Serial.print("switch position : ");
+//    Serial.print(switchPos);
+//    Serial.print("\n");
+//
+//
+//    //digitalWrite(ledPin, true);
+//    //UART.printVescValues();
+//
+////    if ( UART.getVescValues() ) {
+////    Serial.println("print vesc values");
+////    Serial.println(UART.data.rpm);
+////    Serial.println(UART.data.inpVoltage);
+////    Serial.println(UART.data.ampHours);
+////    Serial.println(UART.data.tachometerAbs);
+////
+////  }
+////  else
+////  {
+////    Serial.println("Failed to get data!");
+////  }
+//
+//    Serial.print("state : ");
+//    Serial.print(state);
+//    Serial.print("\n");
+//
+//  
+//  }
   
   //Use LED for status info
   digitalWrite(ledPin, state);
-  if (state) {
-    Serial.println("state is on switching current on");
-    UART.setCurrent(targetCurrent);
-  }
-  delay(50);
+  
+//  if (state) {
+//    Serial.println("state is on switching current on");
+//    UART.setCurrent(targetCurrent);
+//  }
+  //delay(50);
 }
 
 //Turn off output, reset pulse counter and set state variable to false
@@ -158,7 +172,10 @@ void turnOn() {
 
 //Interrupt subroutine, refresh last impulse timestamp and increment pulse counter (until 10000 is reached)
 void pulse() {
-  lastEdgeTime=millis();
+  edgeTime = millis();
+  edgeInterval = edgeTime - lastEdgeTime;
+  lastEdgeTime = edgeTime;
+
   if (inputEdges<100) {
     inputEdges++;
   }  
