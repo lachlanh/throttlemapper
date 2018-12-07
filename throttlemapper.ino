@@ -8,7 +8,7 @@ VescUart UART;
 
 #define CADENCE_MAGNETS 12
  
-#define THROTTLE_MIN 5   // Min value required before power is applied to the motor
+#define THROTTLE_MIN 1   // Min value required before power is applied to the motor
 #define THROTTLE_MAX 25  // A larger throttle value will not result in more power
 #define THROTTLE_OFF 0
  
@@ -37,7 +37,7 @@ volatile unsigned long edgeInterval = 0;
 volatile unsigned long lastEdgeInterval = 0;
 volatile unsigned long edgeTime = 0;
 float cadence = 0.0;
-int throttleStep = 0;
+float throttleStep = 0.0;
 
 bool state=false; // variable holding information about the state of the output
 volatile int currentPWMValue = 0;
@@ -45,7 +45,7 @@ volatile unsigned long pedallingTime = 0;
 volatile int cadenceTicks = 0;
 int switchPos = 0;
 float targetCurrent = 0.0;
-volatile int throttleCurrent = 0;
+volatile float throttleCurrent = 0.0;
 
 
 
@@ -125,26 +125,30 @@ void loop() {
     throttleCurrent = ((cadence-CADENCE_MIN)*throttleStep)+THROTTLE_MIN;
   }
 
-  Serial.print("cad = ");
-  Serial.print(cadence,1); // Show 1 decimal place
-  Serial.print(", Throttle = ");
-  Serial.println(throttleCurrent); 
+ 
 
   
-//  if ((curTime - pedallingTime) > 1000) {
-//    pedallingTime = curTime;
-//    Serial.print("cadence : ");
-//    Serial.print(cadence);
-//    Serial.print("\n");
-//
-//    Serial.print("edgeInterval : ");
-//    Serial.print(edgeInterval);
-//    Serial.print("\n");
-//
-//    Serial.print("lastEdgeTime : ");
-//    Serial.print(lastEdgeTime);
-//    Serial.print("\n");
-//  }
+  if ((curTime - pedallingTime) > 50) {
+    pedallingTime = curTime;
+    //if (state) {
+      Serial.println("state is on switching current on");
+      UART.setCurrent(throttleCurrent);
+    //}
+
+    Serial.print("cad = ");
+    Serial.print(cadence,1); // Show 1 decimal place
+    Serial.print(", Throttle = ");
+    Serial.print(throttleCurrent); 
+    Serial.print(", Throttle = ");
+    Serial.println(throttleStep);
+    Serial.print("edgeInterval : ");
+    Serial.print(edgeInterval);
+    Serial.print("\n");
+
+    Serial.print("lastEdgeTime : ");
+    Serial.print(lastEdgeTime);
+    Serial.print("\n");
+  }
 
 //  if ((curTime - pedallingTime) > 5000) {
 //    Serial.print("cadenceTicks : ");
