@@ -52,7 +52,7 @@ void setup()
   pinMode(CADENCE_PIN, INPUT);
   //pinMode(OVERIDE_PIN, INPUT_PULLUP); // Use internal pullups
   //pinMode(THROTTLE_PIN, OUTPUT);
-  attachInterrupt(0, CadenceInterruptHandler, CHANGE);  // External interrupt for cadence sensor
+  attachInterrupt(digitalPinToInterrupt(CADENCE_PIN), CadenceInterruptHandler, CHANGE);  // External interrupt for cadence sensor
 }
  
 void loop()
@@ -83,6 +83,7 @@ void loop()
     Serial.print(", Throttle = ");
     Serial.println(throttleValue); 
   }
+  //Serial.println(cadenceInteruptFlag);
   //analogWrite(THROTTLE_PIN, throttleValue); // Actualy output the throttle value
 }
  
