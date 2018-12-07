@@ -25,7 +25,7 @@ const int PWMOut = 10;
 //tested on arduino due pins
 
 //Software constants
-const unsigned long activityTimeoutMS = 250; // Allowed PAS signal inactivity time before turning off
+const unsigned long activityTimeoutMS = 400; // Allowed PAS signal inactivity time before turning off
 const int startPulses = 2; // Number of PAS pulses needed before turning on
 const int lowPWMValue = 45, highPWMValue = 132; // PWM values to drive throttle input, default 56 (1,1 V) and 170 (3,4 V), U=n/255*5V, n=U/5V*255
 
@@ -117,7 +117,11 @@ void loop() {
   }
 
   throttleStep = (targetCurrent-THROTTLE_MIN)/(CADENCE_MAX-CADENCE_MIN);
-  if (cadence > CADENCE_MAX) {
+  if (targetCurrent == 0.0) {
+    throttleCurrent = THROTTLE_OFF;
+  } else if (inputEdges < 36) {
+    throttleCurrent = THROTTLE_MAX;
+  } else if (cadence > CADENCE_MAX) {
     throttleCurrent = THROTTLE_MAX; 
   } else if(cadence < CADENCE_MIN) {
     throttleCurrent = THROTTLE_OFF;
@@ -131,23 +135,23 @@ void loop() {
   if ((curTime - pedallingTime) > 50) {
     pedallingTime = curTime;
     //if (state) {
-      Serial.println("state is on switching current on");
+      //Serial.println("state is on switching current on");
       UART.setCurrent(throttleCurrent);
     //}
 
-    Serial.print("cad = ");
-    Serial.print(cadence,1); // Show 1 decimal place
-    Serial.print(", Throttle = ");
-    Serial.print(throttleCurrent); 
-    Serial.print(", Throttle = ");
-    Serial.println(throttleStep);
-    Serial.print("edgeInterval : ");
-    Serial.print(edgeInterval);
-    Serial.print("\n");
-
-    Serial.print("lastEdgeTime : ");
-    Serial.print(lastEdgeTime);
-    Serial.print("\n");
+//    Serial.print("cad = ");
+//    Serial.print(cadence,1); // Show 1 decimal place
+//    Serial.print(", Throttle = ");
+//    Serial.print(throttleCurrent); 
+//    Serial.print(", Throttle = ");
+//    Serial.println(throttleStep);
+//    Serial.print("edgeInterval : ");
+//    Serial.print(edgeInterval);
+//    Serial.print("\n");
+//
+//    Serial.print("lastEdgeTime : ");
+//    Serial.print(lastEdgeTime);
+//    Serial.print("\n");
   }
 
 //  if ((curTime - pedallingTime) > 5000) {
