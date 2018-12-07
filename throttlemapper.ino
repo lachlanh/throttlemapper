@@ -23,6 +23,7 @@ volatile int inputEdges = 0; // counter for the number of pulses since last rese
 volatile unsigned long lastEdgeTime = 0; // timestamp of last PAS pulse
 
 volatile unsigned long edgeInterval = 0;
+volatile unsigned long lastEdgeInterval = 0;
 volatile unsigned long edgeTime = 0;
 float cadence = 0.0;
 
@@ -91,12 +92,29 @@ void loop() {
      
   } 
 
+  lastEdgeInterval = curTime - lastEdgeTime;
+  if (lastEdgeInterval > edgeInterval) {
+    edgeInterval = lastEdgeInterval;
+  }
   //calculate cadence
-  cadence = (1000/edgeInterval)*(60/12); //should give rpm
-
+  if (edgeInterval > 0.0) {
+    cadence = (1000/edgeInterval)*(60/12); //should give rpm
+  } else {
+    cadence = 0.0;
+  }
   if ((curTime - pedallingTime) > 1000) {
+    pedallingTime = curTime;
     Serial.print("cadence : ");
     Serial.print(cadence);
+    Serial.print("\n");
+
+    Serial.print("edgeInterval : ");
+    Serial.print(edgeInterval);
+    Serial.print("\n");
+
+    Serial.print("lastEdgeTime : ");
+    Serial.print(lastEdgeTime);
+    Serial.print("\n");
   }
 
 //  if ((curTime - pedallingTime) > 5000) {
@@ -157,6 +175,7 @@ void turnOff() {
   //analogWrite(PWMOut, lowPWMValue);
   //UART.setDuty(0.0);
   inputEdges=0;
+  //edgeInterval=0;
   state=false;
   interrupts();
 }
