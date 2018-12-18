@@ -119,7 +119,7 @@ void loop() {
   throttleStep = (targetCurrent-THROTTLE_MIN)/(CADENCE_MAX-CADENCE_MIN);
   if (targetCurrent == 0.0) {
     throttleCurrent = THROTTLE_OFF;
-  } else if (inputEdges < 36) {
+  } else if (inputEdges > 2 && inputEdges < 36) {
     throttleCurrent = THROTTLE_MAX;
   } else if (cadence > CADENCE_MAX) {
     throttleCurrent = THROTTLE_MAX; 
