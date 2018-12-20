@@ -61,6 +61,7 @@ void setup() {
   pinMode(switchPinPos3, INPUT_PULLUP);
 
   Serial1.begin(9600);
+//  Serial1.begin(115200);
   while (!Serial1) {;}
   
   UART.setDebugPort(&Serial);
@@ -132,7 +133,7 @@ void loop() {
  
 
   
-  if ((curTime - pedallingTime) > 50) {
+  if ((curTime - pedallingTime) > 5) {
     pedallingTime = curTime;
     //if (state) {
       //Serial.println("state is on switching current on");
