@@ -47,6 +47,8 @@ int switchPos = 0;
 float targetCurrent = 0.0;
 volatile float throttleCurrent = 0.0;
 
+boolean startupBoost=false;
+
 
 
 void setup() {
@@ -60,12 +62,15 @@ void setup() {
   pinMode(switchPinPos1, INPUT_PULLUP);
   pinMode(switchPinPos3, INPUT_PULLUP);
 
+  delay(1000);//wait a second for vesc to come up.
+
   Serial1.begin(9600);
 //  Serial1.begin(115200);
   while (!Serial1) {;}
   
   UART.setDebugPort(&Serial);
   UART.setSerialPort(&Serial1);
+  
 }
 
 
@@ -116,12 +121,13 @@ void loop() {
   } else {
     cadence = 0.0;
   }
-
+  startupBoost=false;
   throttleStep = (targetCurrent-THROTTLE_MIN)/(CADENCE_MAX-CADENCE_MIN);
   if (targetCurrent == 0.0) {
     throttleCurrent = THROTTLE_OFF;
   } else if (inputEdges > 2 && inputEdges < 36) {
-    throttleCurrent = THROTTLE_MAX;
+    //throttleCurrent = THROTTLE_MAX;
+    startupBoost=true;
   } else if (cadence > CADENCE_MAX) {
     throttleCurrent = THROTTLE_MAX; 
   } else if(cadence < CADENCE_MIN) {
@@ -133,11 +139,17 @@ void loop() {
  
 
   
-  if ((curTime - pedallingTime) > 5) {
+  if ((curTime - pedallingTime) > 50) {
     pedallingTime = curTime;
     //if (state) {
       //Serial.println("state is on switching current on");
-      UART.setCurrent(throttleCurrent);
+      if (startupBoost) {
+        UART.setDuty(0.5);
+        Serial.println("startupBoost");
+      } else {
+        UART.setCurrent(throttleCurrent);
+      }
+      //UART.printVescValues();
     //}
 
 //    Serial.print("cad = ");
