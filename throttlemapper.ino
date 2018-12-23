@@ -45,6 +45,11 @@ int switchPos = 0;
 float targetCurrent = 0.0;
 volatile float throttleCurrent = 0.0;
 
+float targetDuty = 0.0;
+float throttleDuty = 0.0;
+float throttleDutyMin = 0.1;
+float throttleDutyMax = 1.0;
+
 boolean startupBoost=false;
 
 //timing loops
@@ -100,17 +105,19 @@ void loop() {
      //blue and red(gnd)
      switchPos = 1;
      targetCurrent = 0.0;
+     targetDuty = 0.0;
      
   } else if (digitalRead(switchPinPos3) == LOW){
      //black and red(gnd)
      switchPos = 3;
      targetCurrent = 25.0;
+     targetDuty = 1.0;
      
   } else {
      //middle pos
      switchPos = 2;
      targetCurrent = 12.5;    
-     
+     targetDuty = 0.5;
   } 
 
   //TODO LH need to revisit the logic here..
@@ -126,30 +133,23 @@ void loop() {
     cadence = 0.0;
   }
   startupBoost=false;
-  throttleStep = (targetCurrent-THROTTLE_MIN)/(CADENCE_MAX-CADENCE_MIN);
-  if (targetCurrent == 0.0) {
-    throttleCurrent = THROTTLE_OFF;
-  } else if (inputEdges > START_EDGES && inputEdges < BOOST_EDGES) {
-    //throttleCurrent = THROTTLE_MAX;
-    startupBoost=true;
+  throttleStep = (targetDuty-throttleDutyMin)/(CADENCE_MAX-CADENCE_MIN);
+  if (targetDuty == 0.0) {
+    throttleDuty = 0.0;
   } else if (cadence > CADENCE_MAX) {
-    throttleCurrent = THROTTLE_MAX; 
+    throttleDuty = throttleDutyMax; 
   } else if(cadence < CADENCE_MIN) {
-    throttleCurrent = THROTTLE_OFF;
+    throttleDuty = 0.0;
   } else {
     //need to start collecting these up 
-    throttleCurrent = ((cadence-CADENCE_MIN)*throttleStep)+THROTTLE_MIN;
+    throttleDuty = ((cadence-CADENCE_MIN)*throttleStep)+throttleDutyMin;
   }
 
   if ((curTime - sendTime) > SEND_TIMEOUT) {
     sendTime = curTime;
-    
-    if (startupBoost) {
-      UART.setDuty(0.5);
-    } else {
-      UART.setCurrent(throttleCurrent);
-    }
 
+    UART.setDuty(throttleDuty);
+    
     if ((curTime - reportTime) > REPORT_TIMEOUT) {
       reportTime = curTime;
       reportStatus();
@@ -167,7 +167,9 @@ void reportStatus() {
    Serial.print("cad: ");
    Serial.print(cadence,1); // Show 1 decimal place
    Serial.print(",tcur: ");
-   Serial.print(throttleCurrent); 
+   Serial.print(throttleCurrent);
+   Serial.print(",tduty: ");
+   Serial.print(throttleDuty); 
    Serial.print(",tstep: ");
    Serial.println(throttleStep);
    Serial.print("edgeInterval : ");
