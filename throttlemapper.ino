@@ -13,7 +13,7 @@ VescUart UART;
 #define THROTTLE_OFF 0
  
 #define CADENCE_MIN 15  // minimum cadence for motor to run
-#define CADENCE_MAX 55  // cadence value that will result in full throttle
+#define CADENCE_MAX 45  // cadence value that will result in full throttle
 
 #define THROTTLE_STEP (THROTTLE_MAX-THROTTLE_MIN)/(CADENCE_MAX-CADENCE_MIN)
 
@@ -47,7 +47,7 @@ volatile float throttleCurrent = 0.0;
 
 float targetDuty = 0.0;
 float throttleDuty = 0.0;
-float throttleDutyMin = 0.1;
+float throttleDutyMin = 0.3;
 float throttleDutyMax = 1.0;
 
 boolean startupBoost=false;
@@ -111,7 +111,7 @@ void loop() {
      //black and red(gnd)
      switchPos = 3;
      targetCurrent = 25.0;
-     targetDuty = 1.0;
+     targetDuty = 0.8;
      
   } else {
      //middle pos
@@ -137,7 +137,7 @@ void loop() {
   if (targetDuty == 0.0) {
     throttleDuty = 0.0;
   } else if (cadence > CADENCE_MAX) {
-    throttleDuty = throttleDutyMax; 
+    throttleDuty = targetDuty; 
   } else if(cadence < CADENCE_MIN) {
     throttleDuty = 0.0;
   } else {
@@ -148,7 +148,12 @@ void loop() {
   if ((curTime - sendTime) > SEND_TIMEOUT) {
     sendTime = curTime;
 
-    UART.setDuty(throttleDuty);
+    //TODO LH testing if setDuty to 0.0 causing braking behaviour and wheeling backwards
+    if (throttleDuty == 0.0) {
+      UART.setCurrent(0.0);
+    } else {
+      UART.setDuty(throttleDuty);
+    }
     
     if ((curTime - reportTime) > REPORT_TIMEOUT) {
       reportTime = curTime;
@@ -187,7 +192,7 @@ void reportStatus() {
      Serial.print(UART.data.inpVoltage);
      Serial.print(",ah: ");
      Serial.println(UART.data.ampHours);
-     Serial.println(UART.data.tachometerAbs);
+     //Serial.println(UART.data.tachometerAbs);
    } else {
      Serial.println("vesc data not available");
    }
