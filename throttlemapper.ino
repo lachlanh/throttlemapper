@@ -1,5 +1,6 @@
-
+//https://github.com/SolidGeek/VescUart
 #include <VescUart.h>
+#include <FastLED.h>
 
 VescUart UART;
 
@@ -29,6 +30,7 @@ const int PASPin = 7;
 const int ledPin = 17;
 const int switchPinPos1 = 9;
 const int switchPinPos3 = 8;
+const int vledPin = 21; //wire voltage led to pin 21, with vcc and gnd
 
 // Variables
 volatile int inputEdges = 0; // counter for the number of pulses since last reset
@@ -57,6 +59,8 @@ unsigned long curTime = 0;
 unsigned long sendTime = 0;
 unsigned long reportTime = 0;
 
+CRGB leds[4];
+
 void setup() {
   Serial.begin(9600);
   
@@ -77,6 +81,10 @@ void setup() {
   curTime = millis();
   sendTime = curTime;
   reportTime = curTime;
+
+  //setup leds
+  FastLED.addLeds<WS2812, vledPin, GRB>(leds, 4);  
+  LEDS.setBrightness(100);
 
   delay(1000);
 }
@@ -192,6 +200,13 @@ void reportStatus() {
      Serial.print(UART.data.inpVoltage);
      Serial.print(",ah: ");
      Serial.println(UART.data.ampHours);
+     if (UART.data.inpVoltage >= 40.0) {
+        leds[0] = CRGB::Green;
+     } else if (UART.data.inpVoltage >= 37.0) {
+        leds[0] = CRGB::Orange;
+     } else {
+        leds[0] = CRGB::Red;
+     }
      //Serial.println(UART.data.tachometerAbs);
    } else {
      Serial.println("vesc data not available");
@@ -220,12 +235,3 @@ void pulse() {
 
   inputEdges++;
 }
-
-
-
-
-
-
-
-
-
