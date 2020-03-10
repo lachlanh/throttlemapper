@@ -30,7 +30,7 @@ const int PASPin = 7;
 const int ledPin = 17;
 const int switchPinPos1 = 9;
 const int switchPinPos3 = 8;
-const int vledPin = 21; //wire voltage led to pin 21, with vcc and gnd
+const int vledPin = 2; //wire voltage led to pin 21, with vcc and gnd //hmm really think pin 10 would be better .. easier to wire
 
 // Variables
 volatile int inputEdges = 0; // counter for the number of pulses since last reset
@@ -202,14 +202,19 @@ void reportStatus() {
      Serial.println(UART.data.ampHours);
      if (UART.data.inpVoltage >= 40.0) {
         leds[0] = CRGB::Green;
-     } else if (UART.data.inpVoltage >= 37.0) {
+     } else if (UART.data.inpVoltage >= 38.0) {
+        leds[0] = CRGB::Yellow;
+     } else if (UART.data.inpVoltage >= 36.0) {
         leds[0] = CRGB::Orange;
      } else {
         leds[0] = CRGB::Red;
      }
+     FastLED.show();
      //Serial.println(UART.data.tachometerAbs);
    } else {
      Serial.println("vesc data not available");
+     leds[0] = CRGB::Red;
+     FastLED.show();
    }
    
 }
