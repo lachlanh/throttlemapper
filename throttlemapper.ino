@@ -31,7 +31,7 @@ const int ledPin = 17;
 const int switchPinPos1 = 9;
 const int switchPinPos3 = 8;
 const int vledPin = 2; //wire voltage led to pin 21, with vcc and gnd //hmm really think pin 10 would be better .. easier to wire
-
+const int numLeds = 4;
 // Variables
 volatile int inputEdges = 0; // counter for the number of pulses since last reset
 volatile unsigned long lastEdgeTime = 0; // timestamp of last PAS pulse
@@ -59,7 +59,7 @@ unsigned long curTime = 0;
 unsigned long sendTime = 0;
 unsigned long reportTime = 0;
 
-CRGB leds[4];
+CRGB leds[numLeds];
 
 void setup() {
   Serial.begin(9600);
@@ -83,8 +83,8 @@ void setup() {
   reportTime = curTime;
 
   //setup leds
-  FastLED.addLeds<WS2812, vledPin, GRB>(leds, 4);  
-  LEDS.setBrightness(100);
+  FastLED.addLeds<WS2812, vledPin, GRB>(leds, numLeds);  
+  //LEDS.setBrightness(100);
 
   delay(1000);
 }
@@ -202,18 +202,33 @@ void reportStatus() {
      Serial.println(UART.data.ampHours);
      if (UART.data.inpVoltage >= 40.0) {
         leds[0] = CRGB::Green;
+        leds[1] = CRGB::Green;
+        leds[2] = CRGB::Green;
+        leds[3] = CRGB::Green;
      } else if (UART.data.inpVoltage >= 38.0) {
         leds[0] = CRGB::Yellow;
+        leds[1] = CRGB::Yellow;
+        leds[2] = CRGB::Yellow;
+        leds[3] = CRGB::Black;
      } else if (UART.data.inpVoltage >= 36.0) {
         leds[0] = CRGB::Orange;
+        leds[1] = CRGB::Orange;
+        leds[2] = CRGB::Black;
+        leds[3] = CRGB::Black;
      } else {
         leds[0] = CRGB::Red;
+        leds[1] = CRGB::Black;
+        leds[2] = CRGB::Black;
+        leds[3] = CRGB::Black;
      }
      FastLED.show();
      //Serial.println(UART.data.tachometerAbs);
    } else {
      Serial.println("vesc data not available");
      leds[0] = CRGB::Red;
+     leds[1] = CRGB::Blue;
+     leds[2] = CRGB::White;
+     leds[3] = CRGB::Green;
      FastLED.show();
    }
    
