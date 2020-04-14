@@ -1,7 +1,7 @@
 #include <unity.h>
 
 void test_function_addition(void) {
-    TEST_ASSERT_EQUAL(32, (25+7));
+    TEST_ASSERT_EQUAL(32, (25+8));
 }
 
 void process() {
