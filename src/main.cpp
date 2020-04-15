@@ -352,21 +352,20 @@ void updateDisplay(long cadence, long kph, float volts, float ah)
     //x offset, y offset
     u8g2.setFont(u8g2_font_logisoso26_tr);
     sprintf(str, "%2ld", cadence);
-    u8g2.drawStr(0, 26, str);
-    sprintf(str, "%2ld", kph);
-    u8g2.drawStr(0, 56, str);
-    dtostrf(volts, 2, 0, str);
+    u8g2.drawStr(8, 26, str);
+    //sprintf(str, "%2ld", kph);
+    //u8g2.drawStr(8, 56, str);
+    dtostrf(volts, 3, 1, str);
     u8g2.drawStr(66, 26, str);
-    dtostrf(ah, 2, 0, str);
+    dtostrf(ah, 3, 1, str);
     u8g2.drawStr(66, 56, str);
 
-    u8g2.setFont(u8g2_font_logisoso16_tr);
-    u8g2.drawStr(34, 26, "cd"); //x offset, y offset
-    u8g2.drawStr(34, 56, "rpm");
-    u8g2.drawStr(100, 26, "v");
-    u8g2.drawStr(100, 56, "ah");
-
     u8g2.setFont(u8g2_font_artossans8_8r);
+    u8g2.drawStr(42, 26, "cd"); //x offset, y offset
+    u8g2.drawStr(42, 56, "rpm");
+    u8g2.drawStr(120, 8, "v");
+    u8g2.drawStr(112, 56, "ah");
+    
     u8g2.drawStr(0, 64, "hello");
   } while (u8g2.nextPage());
 }
