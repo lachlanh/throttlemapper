@@ -3,10 +3,17 @@
 #include <VescUart.h>
 //#include <FastLED.h>
 #include <WS2812.h>
-#include <U8g2lib.h>
+//#include <U8g2lib.h>
+#include <U8x8lib.h>
 
 VescUart UART;
-U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2);
+//U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2);
+//U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8();
+U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
+
+// U8X8_SSD1306_128X64_NONAME_HW_I2C u8g2();
+
+
 
 //leds
 WS2812 LED(4); // 1 LED
@@ -109,7 +116,7 @@ void setup()
   //LEDS.setBrightness(100);
 
   //setup the display
-  u8g2.begin();
+  u8x8.begin();
 
   //TODO LH necessary ?
   delay(1000);
@@ -329,11 +336,15 @@ void pulse()
 
 void updateDisplay(long cadence, long kph, float volts, float ah)
 {
+  u8x8.setFont(u8x8_font_chroma48medium8_r);
+  u8x8.drawString(0,0, "hello world");
+
+  /*
   u8g2.firstPage();
   do
   {
     //x offset, y offset
-    /* u8g2.setFont(u8g2_font_logisoso26_tr);
+    u8g2.setFont(u8g2_font_logisoso26_tr);
     sprintf(str, "%2ld", cadence);
     u8g2.drawStr(0,26,str);
     sprintf(str, "%2ld", kph);
@@ -348,7 +359,7 @@ void updateDisplay(long cadence, long kph, float volts, float ah)
     u8g2.drawStr(34,56,"kh");
     u8g2.drawStr(34,86,"v");
     u8g2.drawStr(34,116,"ah");
- */
+ 
     //x offset, y offset
     u8g2.setFont(u8g2_font_logisoso26_tr);
     sprintf(str, "%2ld", cadence);
@@ -367,5 +378,5 @@ void updateDisplay(long cadence, long kph, float volts, float ah)
     u8g2.drawStr(112, 56, "ah");
     
     u8g2.drawStr(0, 64, "hello");
-  } while (u8g2.nextPage());
+  } while (u8g2.nextPage());*/
 }
