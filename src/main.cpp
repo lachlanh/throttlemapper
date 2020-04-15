@@ -203,11 +203,11 @@ void loop()
     //TODO LH testing if setDuty to 0.0 causing braking behaviour and wheeling backwards
     if (throttleDuty == 0.0)
     {
-      //UART.setCurrent(0.0);
+      UART.setCurrent(0.0);
     }
     else
     {
-      //UART.setDuty(throttleDuty);
+      UART.setDuty(throttleDuty);
     }
 
     if ((curTime - reportTime) > REPORT_TIMEOUT)
@@ -224,46 +224,64 @@ void loop()
 
 void reportStatus()
 {
-  Serial.print("cad: ");
-  Serial.print(cadence, 1); // Show 1 decimal place
-  Serial.print(",tcur: ");
-  Serial.print(throttleCurrent);
-  Serial.print(",tduty: ");
-  Serial.print(throttleDuty);
-  Serial.print(",tstep: ");
-  Serial.println(throttleStep);
-  Serial.print("edgeInterval : ");
-  Serial.print(edgeInterval);
-  Serial.print("\n");
+  // Serial.print("cad: ");
+  // Serial.print(cadence, 1); // Show 1 decimal place
+  // Serial.print(",tcur: ");
+  // Serial.print(throttleCurrent);
+  // Serial.print(",tduty: ");
+  // Serial.print(throttleDuty);
+  // Serial.print(",tstep: ");
+  // Serial.println(throttleStep);
+  // Serial.print("edgeInterval : ");
+  // Serial.print(edgeInterval);
+  // Serial.print("\n");
 
-  Serial.print("lastEdgeTime : ");
-  Serial.println(lastEdgeTime);
+  // Serial.print("lastEdgeTime : ");
+  // Serial.println(lastEdgeTime);
 
   if (UART.getVescValues())
   {
-    Serial.println("-------VESC-------");
-    Serial.print("rpm: ");
-    Serial.print(UART.data.rpm);
-    Serial.print(",volt: ");
-    Serial.print(UART.data.inpVoltage);
-    Serial.print(",ah: ");
-    Serial.println(UART.data.ampHours);
+    // Serial.println("-------VESC-------");
+    // Serial.print("rpm: ");
+    // Serial.print(UART.data.rpm);
+    // Serial.print(",volt: ");
+    // Serial.print(UART.data.inpVoltage);
+    // Serial.print(",ah: ");
+    // Serial.println(UART.data.ampHours);
+    
     if (UART.data.inpVoltage >= 40.0)
     {
-      //leds[0] = CRGB::Green;
+      value = {0, 0, 255};//blue
+      LED.set_crgb_at(0, value); 
+      LED.set_crgb_at(1, value); 
+      LED.set_crgb_at(2, value); 
+      LED.set_crgb_at(3, value); 
     }
     else if (UART.data.inpVoltage >= 38.0)
     {
-      //leds[0] = CRGB::Yellow;
+      value = {0, 255, 0};//green
+      LED.set_crgb_at(0, value); 
+      LED.set_crgb_at(1, value); 
+      LED.set_crgb_at(2, value); 
+      LED.set_crgb_at(3, value); 
     }
     else if (UART.data.inpVoltage >= 36.0)
     {
-      //leds[0] = CRGB::Orange;
+      value = {255, 255, 255};//white
+      LED.set_crgb_at(0, value); 
+      LED.set_crgb_at(1, value); 
+      LED.set_crgb_at(2, value); 
+      LED.set_crgb_at(3, value); 
     }
     else
     {
-      //leds[0] = CRGB::Red;
+      value = {255, 0, 0};//red
+      LED.set_crgb_at(0, value); 
+      LED.set_crgb_at(1, value); 
+      LED.set_crgb_at(2, value); 
+      LED.set_crgb_at(3, value); 
     }
+    LED.sync();
     //FastLED.show();
     //sprintf(str, "%ld rpm", UART.data.rpm);
     updateDisplay(cadence, UART.data.rpm, UART.data.inpVoltage, UART.data.ampHours);
@@ -272,10 +290,11 @@ void reportStatus()
   else
   {
     Serial.println("vesc data not available");
-    value.b = 0;
-    value.g = 0;
-    value.r = 255;             // RGB Value -> Blue
+    value = {255, 255, 0};
     LED.set_crgb_at(0, value); // Set value at LED found at index 0
+    LED.set_crgb_at(1, value); // Set value at LED found at index 0
+    LED.set_crgb_at(2, value); // Set value at LED found at index 0
+    LED.set_crgb_at(3, value); // Set value at LED found at index 0
     LED.sync();                //
     //leds[0] = CRGB::Red;
     //FastLED.show();
