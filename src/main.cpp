@@ -4,14 +4,14 @@
 //#include <FastLED.h>
 #include <WS2812.h>
 //#include <U8g2lib.h>
-#include <U8x8lib.h>
+//#include <U8x8lib.h>
 #include <MemoryFree.h>;
 
 
 VescUart UART;
 //U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2);
 //U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8();
-U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
+//U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 
 // U8X8_SSD1306_128X64_NONAME_HW_I2C u8g2();
 
@@ -119,8 +119,8 @@ void setup()
   //LEDS.setBrightness(100);
 
   //setup the display
-  u8x8.begin();
-  u8x8.setFlipMode(1);
+  //u8x8.begin();
+  //u8x8.setFlipMode(1);
 
   //TODO LH necessary ?
   delay(1000);
@@ -343,8 +343,8 @@ void updateDisplay(long cadence, long kph, float volts, float ah)
   Serial.print(F("updating display"));
   Serial.println(F("Free RAM = ")); //F function does the same and is now a built in library, in IDE > 1.0.0
   Serial.println(freeMemory(), DEC);
-  
-  u8x8.setFont(u8x8_font_chroma48medium8_r);
+
+  /* u8x8.setFont(u8x8_font_chroma48medium8_r);
   u8x8.setCursor(0,0);
   u8x8.print(cadence);
   u8x8.setCursor(4,0);
@@ -353,7 +353,7 @@ void updateDisplay(long cadence, long kph, float volts, float ah)
   u8x8.setCursor(8,0);
   u8x8.print(volts,1);
   u8x8.setCursor(22,0);
-  u8x8.print(F("v"));
+  u8x8.print(F("v")); */
   Serial.print(F("updated display"));
   
   /*
