@@ -3,12 +3,12 @@
 #include <VescUart.h>
 //#include <FastLED.h>
 #include <WS2812.h>
-//#include <U8g2lib.h>
+#include <U8g2lib.h>
 //#include <U8x8lib.h>
 #include <MemoryFree.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <ssd1306.h>
+//#include <Wire.h>
+//#include <SPI.h>
+//#include <ssd1306.h>
 
 
 VescUart UART;
@@ -17,6 +17,8 @@ VescUart UART;
 //U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(/* reset=*/ U8X8_PIN_NONE);
 
 // U8X8_SSD1306_128X64_NONAME_HW_I2C u8g2();
+
+U8G2_SSD1306_128X64_NONAME_1_SW_I2C u8g2(U8G2_R2, 3, 2, U8X8_PIN_NONE);
 
 
 
@@ -123,10 +125,12 @@ void setup()
 
   //setup the display
   //u8x8.begin();
+  u8g2.begin();
   //u8x8.setFlipMode(1);
-  ssd1306_setFixedFont(ssd1306xled_font6x8);
-  ssd1306_128x64_i2c_init();
-  ssd1306_clearScreen();
+  //ssd1306_128x64_i2c_init();
+  //ssd1306_128x64_init()
+  //ssd1306_setFixedFont(ssd1306xled_font6x8);
+  //ssd1306_clearScreen();
 
   //TODO LH necessary ?
   delay(1000);
@@ -350,11 +354,11 @@ void updateDisplay(long cadence, long kph, float volts, float ah)
   Serial.println(F("Free RAM = ")); //F function does the same and is now a built in library, in IDE > 1.0.0
   Serial.println(freeMemory(), DEC);
 
-  ssd1306_setFixedFont(ssd1306xled_font6x8);
-  ssd1306_clearScreen();
-  sprintf(str, "%2ld", cadence);
-  ssd1306_printFixed(0,  8, str, STYLE_NORMAL);
-  ssd1306_printFixed(32,  8, "CAD", STYLE_NORMAL);
+  // ssd1306_setFixedFont(ssd1306xled_font6x8);
+  // ssd1306_clearScreen();
+  // sprintf(str, "%2ld", cadence);
+  // ssd1306_printFixed(0,  8, str, STYLE_NORMAL);
+  // ssd1306_printFixed(32,  8, "CAD", STYLE_NORMAL);
 
 
 
@@ -371,7 +375,7 @@ void updateDisplay(long cadence, long kph, float volts, float ah)
   u8x8.print(F("v")); */
   Serial.print(F("updated display"));
   
-  /*
+  
   u8g2.firstPage();
   do
   {
@@ -410,5 +414,5 @@ void updateDisplay(long cadence, long kph, float volts, float ah)
     u8g2.drawStr(112, 56, "ah");
     
     u8g2.drawStr(0, 64, "hello");
-  } while (u8g2.nextPage());*/
+  } while (u8g2.nextPage());
 }
