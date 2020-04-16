@@ -5,6 +5,8 @@
 #include <WS2812.h>
 //#include <U8g2lib.h>
 #include <U8x8lib.h>
+#include <MemoryFree.h>;
+
 
 VescUart UART;
 //U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R2);
@@ -27,6 +29,7 @@ void updateDisplay(long cadence, long kph, float volts, float ah);
 
 //DO NOT USE.
 //THIS SOFTWARE IS NOT TESTED AND UNFIT FOR ANY PURPOSE.
+
 
 #define CADENCE_MAGNETS 12
 
@@ -338,6 +341,9 @@ void pulse()
 void updateDisplay(long cadence, long kph, float volts, float ah)
 {
   Serial.print(F("updating display"));
+  Serial.println(F("Free RAM = ")); //F function does the same and is now a built in library, in IDE > 1.0.0
+  Serial.println(freeMemory(), DEC);
+  
   u8x8.setFont(u8x8_font_chroma48medium8_r);
   u8x8.setCursor(0,0);
   u8x8.print(cadence);
