@@ -5,7 +5,10 @@
 #include <WS2812.h>
 //#include <U8g2lib.h>
 //#include <U8x8lib.h>
-#include <MemoryFree.h>;
+#include <MemoryFree.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <ssd1306.h>
 
 
 VescUart UART;
@@ -83,7 +86,7 @@ unsigned long curTime = 0;
 unsigned long sendTime = 0;
 unsigned long reportTime = 0;
 
-//char str[6];
+char str[6];
 
 //CRGB leds[4];
 
@@ -121,6 +124,9 @@ void setup()
   //setup the display
   //u8x8.begin();
   //u8x8.setFlipMode(1);
+  ssd1306_setFixedFont(ssd1306xled_font6x8);
+  ssd1306_128x64_i2c_init();
+  ssd1306_clearScreen();
 
   //TODO LH necessary ?
   delay(1000);
@@ -343,6 +349,15 @@ void updateDisplay(long cadence, long kph, float volts, float ah)
   Serial.print(F("updating display"));
   Serial.println(F("Free RAM = ")); //F function does the same and is now a built in library, in IDE > 1.0.0
   Serial.println(freeMemory(), DEC);
+
+  ssd1306_setFixedFont(ssd1306xled_font6x8);
+  ssd1306_clearScreen();
+  sprintf(str, "%2ld", cadence);
+  ssd1306_printFixed(0,  8, str, STYLE_NORMAL);
+  ssd1306_printFixed(32,  8, "CAD", STYLE_NORMAL);
+
+
+
 
   /* u8x8.setFont(u8x8_font_chroma48medium8_r);
   u8x8.setCursor(0,0);
