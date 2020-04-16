@@ -80,7 +80,7 @@ unsigned long curTime = 0;
 unsigned long sendTime = 0;
 unsigned long reportTime = 0;
 
-char str[6];
+//char str[6];
 
 //CRGB leds[4];
 
@@ -117,6 +117,7 @@ void setup()
 
   //setup the display
   u8x8.begin();
+  u8x8.setFlipMode(1);
 
   //TODO LH necessary ?
   delay(1000);
@@ -296,7 +297,7 @@ void reportStatus()
   }
   else
   {
-    Serial.println("vesc data not available");
+    Serial.println(F("vesc data not available"));
     value = {255, 255, 0};
     LED.set_crgb_at(0, value); // Set value at LED found at index 0
     LED.set_crgb_at(1, value); // Set value at LED found at index 0
@@ -305,7 +306,7 @@ void reportStatus()
     LED.sync();                //
     //leds[0] = CRGB::Red;
     //FastLED.show();
-    updateDisplay(0, 0, 0, 0);
+    updateDisplay(cadence, 0, 0, 0);
   }
 }
 
@@ -336,9 +337,19 @@ void pulse()
 
 void updateDisplay(long cadence, long kph, float volts, float ah)
 {
+  Serial.print(F("updating display"));
   u8x8.setFont(u8x8_font_chroma48medium8_r);
-  u8x8.drawString(0,0, "hello world");
-
+  u8x8.setCursor(0,0);
+  u8x8.print(cadence);
+  u8x8.setCursor(4,0);
+  u8x8.print(F("cad"));
+  
+  u8x8.setCursor(8,0);
+  u8x8.print(volts,1);
+  u8x8.setCursor(22,0);
+  u8x8.print(F("v"));
+  Serial.print(F("updated display"));
+  
   /*
   u8g2.firstPage();
   do
