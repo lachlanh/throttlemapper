@@ -28,7 +28,7 @@ void setup() {
   //ssd1306_clearScreen();
 }
 
-void updateDisplay(long cadence, long kph, float volts, float ah)
+/*void updateDisplay(long cadence, long kph, float volts, float ah)
 {
   //Serial.print(F("updating display"));
   //Serial.println(F("Free RAM = ")); //F function does the same and is now a built in library, in IDE > 1.0.0
@@ -95,7 +95,7 @@ void updateDisplay(long cadence, long kph, float volts, float ah)
     
     //u8g2.drawStr(0, 64, "hello");
   } while (u8g2.nextPage());
-*/
+
   //Serial.print(F("updated display"));
-}
+}*/
 

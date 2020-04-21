@@ -1,15 +1,10 @@
 #include <Arduino.h>
 //https://github.com/SolidGeek/VescUart
 #include <VescUart.h>
-#include <WS2812.h>
+#include <FastLED.h>
 #include <MemoryFree.h>
 
 VescUart UART;
-
-//leds
-WS2812 LED(4); // 1 LED
-cRGB value;
-cRGB black = {0, 0, 0};
 
 void pulse();
 void turnOn();
@@ -45,6 +40,7 @@ const int ledPin = 17;
 const int switchPinPos1 = 9;
 const int switchPinPos3 = 8;
 const int vledPin = 10; //wire voltage led to pin 21, with vcc and gnd //hmm really think pin 10 would be better .. easier to wire
+const int numLeds = 4;
 
 // Variables
 volatile int inputEdges = 0;                 // counter for the number of pulses since last reset
@@ -75,7 +71,7 @@ unsigned long reportTime = 0;
 
 char str[6];
 
-//CRGB leds[4];
+CRGB leds[numLeds];
 
 void setup()
 {
@@ -104,10 +100,10 @@ void setup()
   reportTime = curTime;
 
   //setup leds
-  LED.setOutput(vledPin);
+  FastLED.addLeds<WS2812, vledPin, GRB>(leds, numLeds);
   
   //TODO LH necessary ?
-  delay(1000);
+  delay(100);
 }
 
 void loop()
@@ -249,49 +245,56 @@ void reportStatus()
     
     if (UART.data.inpVoltage >= 40.0)
     {
-      value = {0, 0, 255};//blue
-      LED.set_crgb_at(0, value); 
-      LED.set_crgb_at(1, value); 
-      LED.set_crgb_at(2, value); 
-      LED.set_crgb_at(3, value); 
+      leds[0] = CRGB::Blue;
+      leds[1] = CRGB::Blue;
+      leds[2] = CRGB::Blue;
+      leds[3] = CRGB::Blue;
     }
     else if (UART.data.inpVoltage >= 38.0)
     {
-      value = {0, 255, 0};//green
-      LED.set_crgb_at(0, value); 
-      LED.set_crgb_at(1, value); 
-      LED.set_crgb_at(2, value); 
-      LED.set_crgb_at(3, black); 
+      leds[0] = CRGB::Green;
+      leds[1] = CRGB::Green;
+      leds[2] = CRGB::Green;
+      leds[3] = CRGB::Black;
     }
     else if (UART.data.inpVoltage >= 36.0)
     {
-      value = {255, 255, 255};//white
-      LED.set_crgb_at(0, value); 
-      LED.set_crgb_at(1, value); 
-      LED.set_crgb_at(2, black); 
-      LED.set_crgb_at(3, black); 
+      leds[0] = CRGB::White;
+      leds[1] = CRGB::White;
+      leds[2] = CRGB::Black;
+      leds[3] = CRGB::Black;
     }
     else
     {
-      value = {255, 0, 0};//red
-      LED.set_crgb_at(0, value); 
-      LED.set_crgb_at(1, value); 
-      LED.set_crgb_at(2, value); 
-      LED.set_crgb_at(3, value); 
+      leds[0] = CRGB::Red;
+      leds[1] = CRGB::Black;
+      leds[2] = CRGB::Black;
+      leds[3] = CRGB::Black;
     }
-    LED.sync();
+    FastLED.show();
+    updateDisplay(cadence, UART.data.rpm, UART.data.inpVoltage, UART.data.ampHours);
   }
   else
   {
     Serial.println(F("vesc data not available"));
-    value = {255, 255, 0};
-    LED.set_crgb_at(0, value); // Set value at LED found at index 0
-    LED.set_crgb_at(1, value); // Set value at LED found at index 0
-    LED.set_crgb_at(2, value); // Set value at LED found at index 0
-    LED.set_crgb_at(3, value); // Set value at LED found at index 0
-    LED.sync();                //
+    leds[0] = CRGB::Red;
+    leds[1] = CRGB::Blue;
+    leds[2] = CRGB::White;
+    leds[3] = CRGB::Green;
+    FastLED.show();
+    updateDisplay(cadence, 0, 0, 0);
   }
 }
+
+void updateDisplay(long cadence, long kph, float volts, float ah)
+{
+  //Serial.print(F("updating display"));
+  //Serial.println(F("Free RAM = ")); //F function does the same and is now a built in library, in IDE > 1.0.0
+  //Serial.println(freeMemory(), DEC);
+
+}
+    
+
 
 //Turn off output, reset pulse counter and set state variable to false
 void turnOff()
