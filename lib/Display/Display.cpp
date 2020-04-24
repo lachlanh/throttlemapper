@@ -1,6 +1,10 @@
 #include "Display.h"
 #include <FastLED.h>
 
+#ifdef REPORT_MEMORY
+  #include <MemoryFree.h>
+#endif
+
 #define NUM_LEDS 4
 #define VLED_PIN 10
 CRGB leds[NUM_LEDS];
@@ -11,8 +15,8 @@ void setupDisplay () {
 
 void updateDisplay(long cadence, long kph, float volts, float ah)
 {
-  //Serial.println(F("Free RAM = ")); //F function does the same and is now a built in library, in IDE > 1.0.0
-  //Serial.println(freeMemory(), DEC);
+  
+  
 
   if (volts >= 40.0) {
     leds[0] = CRGB::Blue;
@@ -42,4 +46,11 @@ void updateDisplay(long cadence, long kph, float volts, float ah)
   }
   FastLED.show();
 
+}
+
+void reportMemory () {
+  #ifdef REPORT_MEMORY 
+  Serial.println(F("Free RAM = "));
+  Serial.println(freeMemory(), DEC);
+  #endif
 }

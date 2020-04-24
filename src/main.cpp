@@ -3,7 +3,7 @@
 #include <VescUart.h>
 #include <Display.h>
 
-//#include <MemoryFree.h>
+
 
 VescUart UART;
 
@@ -15,6 +15,8 @@ void reportStatus();
 
 //DO NOT USE.
 //THIS SOFTWARE IS NOT TESTED AND UNFIT FOR ANY PURPOSE.
+
+#define REPORT_MEMORY
 
 #define CADENCE_MAGNETS 12
 
