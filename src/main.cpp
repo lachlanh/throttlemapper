@@ -2,50 +2,20 @@
 //https://github.com/SolidGeek/VescUart
 #include <VescUart.h>
 #include <Display.h>
+#include "Config.h"
 
 
 
-VescUart UART;
 
 void pulse();
-void turnOn();
-void turnOff();
 void reportStatus();
 
 
 //DO NOT USE.
 //THIS SOFTWARE IS NOT TESTED AND UNFIT FOR ANY PURPOSE.
 
-#define REPORT_MEMORY
-
-#define CADENCE_MAGNETS 12
-
-#define THROTTLE_MIN 5  // Min value required before power is applied to the motor
-#define THROTTLE_MAX 25 // A larger throttle value will not result in more power
-#define THROTTLE_OFF 0
-
-#define CADENCE_MIN 15 // minimum cadence for motor to run
-#define CADENCE_MAX 45 // cadence value that will result in full throttle
-
-#define THROTTLE_STEP (THROTTLE_MAX - THROTTLE_MIN) / (CADENCE_MAX - CADENCE_MIN)
-
-#define SEND_TIMEOUT 50     //ms to send signal to vesc
-#define REPORT_TIMEOUT 1000 //ms to update screen/serial
-
-#define ACTIVITY_TIMEOUT 400 //ms for inactivity
-#define START_EDGES 2        //pas edges to start (only used for boost)
-#define BOOST_EDGES 18       //edges until boost stops
-
-//Hardware constants
-const int PASPin = 7;
-const int ledPin = 17;
-const int switchPinPos1 = 9;
-const int switchPinPos3 = 8;
-const int vledPin = 10; //wire voltage led to pin 21, with vcc and gnd //hmm really think pin 10 would be better .. easier to wire
-
 
 // Variables
-volatile int inputEdges = 0;                 // counter for the number of pulses since last reset
 volatile unsigned long lastEdgeTime = 0;     // timestamp of last PAS pulse
 volatile unsigned long lastEdgeInterval = 0; //interval since last pulse
 volatile unsigned long edgeInterval = 0;     // interval between last 2 pulses
@@ -56,15 +26,11 @@ float throttleStep = 0.0;
 
 bool state = false; // variable holding information about the state of the output
 int switchPos = 0;
-float targetCurrent = 0.0;
-volatile float throttleCurrent = 0.0;
 
 float targetDuty = 0.0;
 float throttleDuty = 0.0;
-float throttleDutyMin = 0.3;
-float throttleDutyMax = 1.0;
 
-boolean startupBoost = false;
+VescUart UART;
 
 //timing loops
 unsigned long curTime = 0;
@@ -73,20 +39,18 @@ unsigned long reportTime = 0;
 
 char str[6];
 
-//CRGB leds[4];
-
-
 void setup()
 {
   Serial.begin(9600);
 
-  pinMode(PASPin, INPUT);  // initialize the PAS pin as a input
-  attachInterrupt(digitalPinToInterrupt(PASPin), pulse, RISING); //Each rising edge on PAS pin causes an interrupt
-  pinMode(ledPin, OUTPUT); // initialize the LED as an output
+  pinMode(PAS_PIN, INPUT);  // initialize the PAS pin as a input
+  //Each rising edge on PAS pin causes an interrupt
+  attachInterrupt(digitalPinToInterrupt(PAS_PIN), pulse, RISING);
+  pinMode(LED_PIN, OUTPUT); // initialize the LED as an output
 
   //initialize the switch pins
-  pinMode(switchPinPos1, INPUT_PULLUP);
-  pinMode(switchPinPos3, INPUT_PULLUP);
+  pinMode(SWITCH_PIN_POS1, INPUT_PULLUP);
+  pinMode(SWITCH_PIN_POS3, INPUT_PULLUP);
 
   //uart to vesc
   Serial1.begin(9600);
@@ -115,44 +79,26 @@ void loop()
 
   curTime = millis();
 
-  //If PAS signal is inactive for too long, turn off everything
-  if ((curTime > lastEdgeTime) && ((curTime - lastEdgeTime) > ACTIVITY_TIMEOUT))
-  {
-    turnOff();
-  }
-
-  //If system is off, check if the impulses are active
-  if ((!state) && ((millis() - lastEdgeTime) < ACTIVITY_TIMEOUT))
-  {
-    //if impulses are active, check if there were enough pulses to turn on
-    if (inputEdges > START_EDGES)
-    {
-      turnOn();
-    }
-  }
 
   //logic to read 3 position switch
   //this should have some safety built in, if it loses ground it will stick in a position.
-  if (digitalRead(switchPinPos1) == LOW)
+  if (digitalRead(SWITCH_PIN_POS1) == LOW)
   {
     //blue and red(gnd)
     switchPos = 1;
-    targetCurrent = 0.0;
-    targetDuty = 0.0;
+    targetDuty = THROTTLE_OFF;
   }
-  else if (digitalRead(switchPinPos3) == LOW)
+  else if (digitalRead(SWITCH_PIN_POS3) == LOW)
   {
     //black and red(gnd)
     switchPos = 3;
-    targetCurrent = 25.0;
-    targetDuty = 0.8;
+    targetDuty = THROTTLE_DUTY_MAX;
   }
   else
   {
     //middle pos
     switchPos = 2;
-    targetCurrent = 12.5;
-    targetDuty = 0.5;
+    targetDuty = THROTTLE_DUTY_MID;
   }
 
   //TODO LH need to revisit the logic here..
@@ -162,6 +108,7 @@ void loop()
   {
     edgeInterval = lastEdgeInterval;
   }
+  
   //calculate cadence
   if (edgeInterval > 0.0)
   {
@@ -174,11 +121,10 @@ void loop()
   {
     cadence = 0.0;
   }
-  startupBoost = false;
-  throttleStep = (targetDuty - throttleDutyMin) / (CADENCE_MAX - CADENCE_MIN);
-  if (targetDuty == 0.0)
+  throttleStep = (targetDuty - THROTTLE_DUTY_MIN) / (CADENCE_MAX - CADENCE_MIN);
+  if (targetDuty == THROTTLE_OFF)
   {
-    throttleDuty = 0.0;
+    throttleDuty = THROTTLE_OFF;
   }
   else if (cadence > CADENCE_MAX)
   {
@@ -186,12 +132,12 @@ void loop()
   }
   else if (cadence < CADENCE_MIN)
   {
-    throttleDuty = 0.0;
+    throttleDuty = THROTTLE_OFF;
   }
   else
   {
     //need to start collecting these up
-    throttleDuty = ((cadence - CADENCE_MIN) * throttleStep) + throttleDutyMin;
+    throttleDuty = ((cadence - CADENCE_MIN) * throttleStep) + THROTTLE_DUTY_MIN;
   }
 
   if ((curTime - sendTime) > SEND_TIMEOUT)
@@ -199,9 +145,9 @@ void loop()
     sendTime = curTime;
 
     //TODO LH testing if setDuty to 0.0 causing braking behaviour and wheeling backwards
-    if (throttleDuty == 0.0)
+    if (throttleDuty == THROTTLE_OFF)
     {
-      UART.setCurrent(0.0);
+      UART.setCurrent(THROTTLE_OFF);
     }
     else
     {
@@ -217,7 +163,7 @@ void loop()
 
   //TODO LH need to rework this
   //Use LED for status info
-  digitalWrite(ledPin, state);
+  digitalWrite(LED_PIN, state);
 }
 
 void reportStatus()
@@ -257,28 +203,11 @@ void reportStatus()
   }
 }
 
-//Turn off output, reset pulse counter and set state variable to false
-void turnOff()
-{
-  noInterrupts();
-  inputEdges = 0;
-  state = false;
-  interrupts();
-}
-
-//Turn on output and set state variable to true
-void turnOn()
-{
-  state = true;
-}
-
 //Interrupt subroutine, refresh last impulse timestamp and increment pulse counter (until 10000 is reached)
 void pulse()
 {
   edgeTime = millis();
   edgeInterval = edgeTime - lastEdgeTime;
   lastEdgeTime = edgeTime;
-
-  inputEdges++;
 }
 

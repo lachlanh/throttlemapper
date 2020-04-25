@@ -1,12 +1,11 @@
 #include "Display.h"
+#include "Config.h"
 #include <FastLED.h>
 
 #ifdef REPORT_MEMORY
   #include <MemoryFree.h>
 #endif
 
-#define NUM_LEDS 4
-#define VLED_PIN 10
 CRGB leds[NUM_LEDS];
 
 void setupDisplay () {
