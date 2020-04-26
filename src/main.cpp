@@ -3,7 +3,7 @@
 #include <VescUart.h>
 #include <Display.h>
 #include "Config.h"
-
+#include "PedalAssist.h"
 
 
 
@@ -110,17 +110,8 @@ void loop()
   }
   
   //calculate cadence
-  if (edgeInterval > 0.0)
-  {
-    //this calculation always gives multiples of 5.. think it is faulty
-    //cadence = (1000 / edgeInterval) * (60 / 12); //should give rpm this is getting truncated somehow.. 
-
-    cadence = 60000 / (edgeInterval * CADENCE_MAGNETS); 
-  }
-  else
-  {
-    cadence = 0.0;
-  }
+  cadence = calculateCadence(edgeInterval, CADENCE_MAGNETS);
+  
   throttleStep = (targetDuty - THROTTLE_DUTY_MIN) / (CADENCE_MAX - CADENCE_MIN);
   if (targetDuty == THROTTLE_OFF)
   {
