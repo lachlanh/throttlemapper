@@ -166,19 +166,27 @@ void loop()
   digitalWrite(LED_PIN, state);
 }
 
+//Interrupt subroutine, get time between pulses. no longer tooks at pulse counts
+void pulse()
+{
+  edgeTime = millis();
+  edgeInterval = edgeTime - lastEdgeTime;
+  lastEdgeTime = edgeTime;
+}
+
 void reportStatus()
 {
   Serial.print(F("cad: "));
   Serial.print(cadence, 1); // Show 1 decimal place
   // Serial.print(",tcur: ");
   // Serial.print(throttleCurrent);
-  // Serial.print(",tduty: ");
-  // Serial.print(throttleDuty);
-  // Serial.print(",tstep: ");
-  // Serial.println(throttleStep);
-  // Serial.print("edgeInterval : ");
-  // Serial.print(edgeInterval);
-  // Serial.print("\n");
+  Serial.print(F(",tduty: "));
+  Serial.print(throttleDuty);
+  Serial.print(F(",tstep: "));
+  Serial.println(throttleStep);
+  Serial.print(F("edgeInterval : "));
+  Serial.print(edgeInterval);
+  Serial.print(F("\n"));
 
   // Serial.print("lastEdgeTime : ");
   // Serial.println(lastEdgeTime);
@@ -203,11 +211,5 @@ void reportStatus()
   }
 }
 
-//Interrupt subroutine, refresh last impulse timestamp and increment pulse counter (until 10000 is reached)
-void pulse()
-{
-  edgeTime = millis();
-  edgeInterval = edgeTime - lastEdgeTime;
-  lastEdgeTime = edgeTime;
-}
+
 

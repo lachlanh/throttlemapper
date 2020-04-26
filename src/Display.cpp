@@ -38,6 +38,7 @@ void updateDisplay(long cadence, long kph, float volts, float ah)
     leds[2] = CRGB::Black;
     leds[3] = CRGB::Black;
   } else {
+    //0.0 is sent when no connection to vesc, useful for debug
     leds[0] = CRGB::Red;
     leds[1] = CRGB::Blue;
     leds[2] = CRGB::White;
