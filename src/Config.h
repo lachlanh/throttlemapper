@@ -3,9 +3,12 @@
 
 //Hardware constants
 const int PAS_PIN = 7;
-const int LED_PIN = 17;
+const int LED_PIN = 13;
 const int SWITCH_PIN_POS1 = 9;
 const int SWITCH_PIN_POS3 = 8;
+
+const int SERIAL_RX_PIN = 10;
+const int SERIAL_TX_PIN = 11;
 
 //Pedal Assist constants
 const int CADENCE_MAGNETS = 12;

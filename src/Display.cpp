@@ -1,22 +1,22 @@
 #include "Display.h"
 #include "Config.h"
-#include <FastLED.h>
+//#include <FastLED.h>
 
 #ifdef REPORT_MEMORY
-  #include <MemoryFree.h>
+  //#include <MemoryFree.h>
 #endif
 
-CRGB leds[NUM_LEDS];
+//CRGB leds[NUM_LEDS];
 
 void setupDisplay () {
-  FastLED.addLeds<WS2812, VLED_PIN, GRB>(leds, NUM_LEDS);
+  //FastLED.addLeds<WS2812, VLED_PIN, GRB>(leds, NUM_LEDS);
 }
 
 void updateDisplay(long cadence, long kph, float volts, float ah)
 {
   
   
-
+/*
   if (volts >= 40.0) {
     leds[0] = CRGB::Blue;
     leds[1] = CRGB::Blue;
@@ -45,12 +45,12 @@ void updateDisplay(long cadence, long kph, float volts, float ah)
     leds[3] = CRGB::Green;
   }
   FastLED.show();
-
+*/
 }
 
 void reportMemory () {
   #ifdef REPORT_MEMORY 
-  Serial.println(F("Free RAM = "));
-  Serial.println(freeMemory(), DEC);
+  //Serial.println(F("Free RAM = "));
+  //Serial.println(freeMemory(), DEC);
   #endif
 }

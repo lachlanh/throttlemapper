@@ -2,6 +2,7 @@
 //https://github.com/SolidGeek/VescUart
 #include <VescUart.h>
 #include <Display.h>
+#include <SoftwareSerial.h>
 #include "Config.h"
 #include "PedalAssist.h"
 
@@ -31,6 +32,7 @@ float targetDuty = 0.0;
 float throttleDuty = 0.0;
 
 VescUart UART;
+SoftwareSerial softSerial(SERIAL_RX_PIN, SERIAL_TX_PIN);
 
 //timing loops
 unsigned long curTime = 0;
@@ -42,6 +44,7 @@ char str[6];
 void setup()
 {
   Serial.begin(9600);
+  Serial1.begin(9600);
 
   pinMode(PAS_PIN, INPUT);  // initialize the PAS pin as a input
   //Each rising edge on PAS pin causes an interrupt
@@ -53,7 +56,7 @@ void setup()
   pinMode(SWITCH_PIN_POS3, INPUT_PULLUP);
 
   //uart to vesc
-  Serial1.begin(9600);
+  //Serial1.begin(9600);
   while (!Serial1)
   {
     ;
@@ -154,7 +157,7 @@ void loop()
 
   //TODO LH need to rework this
   //Use LED for status info
-  digitalWrite(LED_PIN, state);
+  //digitalWrite(LED_PIN, state);
 }
 
 //Interrupt subroutine, get time between pulses. no longer tooks at pulse counts
@@ -167,6 +170,7 @@ void pulse()
 
 void reportStatus()
 {
+  
   Serial.print(F("cad: "));
   Serial.print(cadence, 1); // Show 1 decimal place
   // Serial.print(",tcur: ");
@@ -184,21 +188,23 @@ void reportStatus()
 
   if (UART.getVescValues())
   {
-    // Serial.println("-------VESC-------");
-    // Serial.print("rpm: ");
-    // Serial.print(UART.data.rpm);
-    // Serial.print(",volt: ");
-    // Serial.print(UART.data.inpVoltage);
-    // Serial.print(",ah: ");
-    // Serial.println(UART.data.ampHours);
+    Serial.println("-------VESC-------");
+    Serial.print("rpm: ");
+    Serial.print(UART.data.rpm);
+    Serial.print(",volt: ");
+    Serial.print(UART.data.inpVoltage);
+    Serial.print(",ah: ");
+    Serial.println(UART.data.ampHours);
     
-    
-    updateDisplay(cadence, UART.data.rpm, UART.data.inpVoltage, UART.data.ampHours);
+    digitalWrite(LED_PIN, HIGH);
+    //updateDisplay(cadence, UART.data.rpm, UART.data.inpVoltage, UART.data.ampHours);
   }
   else
   {
     Serial.println(F("vesc data not available"));
-    updateDisplay(cadence, 0, 0, 0);
+    digitalWrite(LED_PIN, LOW);
+
+    //updateDisplay(cadence, 0, 0, 0);
   }
 }
 
